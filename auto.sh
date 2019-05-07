@@ -89,12 +89,14 @@ sed -i "/admin.site.urls/a  \    path(\'test/\', include(\'$app_name.urls\'))," 
 # migrate
 cd $Env_folder/$project_name
 python manage.py migrate
-python manage.py runserver 0:8000 &
+echo "[****SUCCESS****]: Project initialized, keep up the good work!"
+echo "[****SUCCESS****]: Django is running at http://localhost:8000/test/hello_django/, Open your brower to access it!"
+python manage.py runserver 0:8000
 
-echo "[SUCCESS]: Project initialized, keep up the good work!"
-
-sleep 3
-chromium-browser 127.0.0.1:8000/test/hello_django/
-
+#if hash chromium-browser 2>/dev/null; then
+#    chromium-browser 127.0.0.1:8000/test/hello_django/
+#else
+#    echo "[****SUCCESS****]: Django is running at http://localhost:8000/test/hello_django/, Open your brower to access it!"
+#fi
 
 
