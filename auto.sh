@@ -15,9 +15,10 @@ fi
 # if use celery
 read -p "use_celery [n]:"  use_celery
 if [ -z "$use_celery" ];then
-    :
-fi
+    use_celery='n'
+else
     use_celery='y'
+fi
 
 Shell_folder=$(dirname $(readlink -f "$0"))
 
@@ -68,7 +69,7 @@ cat djangorestframework.conf >> $Filename
 
 
 # add celery
-if [ -n "$use_celery" ]; then
+if [ ${use_celery} == "y" ]; then
     # rename command/directory
     sed -i "s/test/$project_name/g"  celery_config/celery_worker.conf celery_config/celery_beat.conf
     sed -i "/yourdir/c directory=$Env_folder"  celery_config/celery_worker.conf celery_config/celery_beat.conf
