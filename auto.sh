@@ -71,8 +71,8 @@ cat djangorestframework.conf >> $Filename
 if [ -n "$use_celery" ]; then
     # rename command/directory
     sed -i "s/test/$project_name/g"  celery_config/celery_worker.conf celery_config/celery_beat.conf
-    sed -i "/yourdir/c directory=$Env_folder"  celery_config/celery_worker.conf celery_config/celery_beat.conf
-    sed -i "s/mytest/$app_name/g"  celery_config/celery.py
+    sed -i "/yourdir/c directory=$Env_folder/$project_name"  celery_config/celery_worker.conf celery_config/celery_beat.conf
+    sed -i "s/mytest/$project_name/g"  celery_config/celery.py
     cp celery_config/celery_* $App_folder
     cat celery_config/django_celery.conf >> $Filename
     cp celery_config/__init__.py  celery_config/celery.py  $Project_folder
