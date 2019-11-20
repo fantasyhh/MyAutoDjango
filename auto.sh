@@ -15,9 +15,42 @@ fi
 # if use celery
 read -p "use_celery [n]:"  use_celery
 if [ -z "$use_celery" ];then
-    :
-fi
+    use_celery='n'
+else
     use_celery='y'
+fi
+
+# choice for postgres
+read -p "use postgres to replace default sqlite [n]:"  use_postgres
+if [ -z "$use_postgres" ];then
+	use_postgres='n'
+fi 
+
+if [ ${use_postgres} == "y" ]; then 
+	read -p "Postgres DateBase Name [postgres]:" p_name
+        if [ -z "$p_name" ];then
+		p_name='postgres'
+	fi
+	read -p "Postgres DateBase User [postgres]:" p_user
+        if [ -z "$p_user" ];then
+		p_user='postgres'
+	fi
+	read -p "Postgres DateBase Password ['']:" p_password
+        if [ -z "$p_password" ];then
+		p_password=''
+	fi
+	read -p "Postgres DateBase HOST [127.0.0.1]:" p_host
+        if [ -z "$p_host" ];then
+		p_host='127.0.0.1'
+	fi
+	read -p "Postgres DateBase PORT [5432]:" p_port
+        if [ -z "$p_port" ];then
+		p_port=5432
+	fi
+
+else
+	:
+fi
 
 Shell_folder=$(dirname $(readlink -f "$0"))
 
@@ -59,6 +92,19 @@ sed -i '/App/i CORS_ALLOW_CREDENTIALS = True' $Filename
 sed -i '/App/i CORS_ORIGIN_ALLOW_ALL = True \n' $Filename
 sed -i "/common/i \    \'corsheaders.middleware.CorsMiddleware\'," $Filename
 
+# add database csettings
+if [ ${use_postgres} == "y" ]; then 
+	# install psycopg2
+	pip install psycopg2 -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+        sed -i 's/backends.sqlite3/backends.postgresql_psycopg2/g' $Filename
+        sed -i '/sqlite3/d' $Filename
+        sed -i  "/ENGINE/a  \        \'NAME\': \'$p_name\',"  $Filename
+        sed -i  "/'NAME': '$p_name'/a  \        \'USER\': \'$p_user\'," $Filename
+        sed -i  "/'USER': '$p_user'/a  \        \'PASSWORD\': \'$p_password\',"  $Filename
+	sed -i  "/'PASSWORD': '$p_password'/a  \        \'HOST\': \'$p_host\',"  $Filename
+        sed -i  "/'HOST': '$p_host'/a  \        \'PORT\': $p_port,"  $Filename
+fi
 
 # change timezone
 sed -i  's/UTC/Asia\/Shanghai/g'  $Filename
@@ -68,7 +114,7 @@ cat djangorestframework.conf >> $Filename
 
 
 # add celery
-if [ -n "$use_celery" ]; then
+if [ ${use_celery} == "y" ]; then
     # rename command/directory
     sed -i "s/test/$project_name/g"  celery_config/celery_worker.conf celery_config/celery_beat.conf
     sed -i "/yourdir/c directory=$Env_folder/$project_name"  celery_config/celery_worker.conf celery_config/celery_beat.conf
